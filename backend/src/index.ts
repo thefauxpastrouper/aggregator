@@ -43,7 +43,9 @@ app.listen(PORT, () => {
   // Start the cron job for daily updates
   startCronJob();
   
-  // Run crawler immediately for testing as requested
-  console.log('Running crawler immediately for testing...');
-  runCrawler();
+  // Run crawler immediately in background with error handling so it never crashes the API server
+  console.log('Running crawler immediately in background...');
+  runCrawler().catch(err => {
+    console.error('Initial background crawler run failed:', err);
+  });
 });

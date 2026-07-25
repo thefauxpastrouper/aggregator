@@ -1,20 +1,21 @@
-import puppeteer from 'puppeteer';
+import puppeteer, { Browser } from 'puppeteer';
 
 export async function parseUniversityNotices(university: string, url: string) {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-  const page = await browser.newPage();
   const notices: { university: string; title: string; url: string; isPdf: boolean; date?: Date; summary?: string }[] = [];
+  let browser: Browser | null = null;
 
   try {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+    });
+    const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
     // Wait a brief 2 seconds for any client-side rendering of tables/lists
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     // Parser logic
-    const extracted = await page.evaluate((uni) => {
+    const extracted = await page.evaluate((uni: string) => {
       const items: { title: string; href: string; dateStr?: string; summary?: string }[] = [];
       
       if (uni === 'DU') {
@@ -147,7 +148,7 @@ export async function parseUniversityNotices(university: string, url: string) {
   } catch (error) {
     console.error(`Failed to parse ${university} at ${url}:`, error);
   } finally {
-    await browser.close();
+    if (browser) await browser.close();
   }
   
   // return up to 20 notices to avoid spam
