@@ -1,0 +1,14 @@
+# Global Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.secret
+
+# Dependencies & Outputs
+node_modules
+dist
+out
+.cache
+.DS_Store
